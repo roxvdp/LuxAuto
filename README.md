@@ -1,2 +1,2 @@
 # LuxAuto
-luxury car rental business
+Luxury car rental business
