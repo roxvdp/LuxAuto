@@ -32,8 +32,12 @@ CREATE TABLE cars (
     year INT NOT NULL,
     daily_price NUMERIC(10,2) NOT NULL,
     license_plate VARCHAR(20) UNIQUE NOT NULL,
-    status VARCHAR(50) NOT NULL CHECK (status IN ('available', 'rented', 'maintenance'))
+    status VARCHAR(50) NOT NULL CHECK (status IN ('available', 'rented', 'maintenance')),
+    user_id UUID,
+    created_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT fk_car_user FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+
 
 -- Verhuringen
 CREATE TABLE rentals (
