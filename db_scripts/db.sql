@@ -15,11 +15,11 @@ CREATE TABLE roles (
 
 -- Gebruikers
 CREATE TABLE users (
-    user_id UUID PRIMARY KEY,
+    user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash TEXT,
-    name VARCHAR(255),
-    role_id INT,
+    password_hash TEXT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    role_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     CONSTRAINT fk_role FOREIGN KEY (role_id) REFERENCES roles(role_id)
 );
@@ -59,15 +59,26 @@ CREATE TABLE payments (
 );
 
 -- ====== INSERT INITIËLE ROLLEN ======
-INSERT INTO roles (role_name) VALUES ('admin'), ('customer');
+INSERT INTO roles (role_name) VALUES
+('admin'),
+('customer');
+
+-- ====== INSERT INITIËLE AUTO'S ======
+INSERT INTO cars (brand, model, year, daily_price, license_plate, status) VALUES
+('Lamborghini', 'Aventador', 2022, 1200.00, 'LMB-001', 'available'),
+('Ferrari', '488 GTB', 2021, 1000.00, 'FER-002', 'available'),
+('Maserati', 'Levante', 2020, 800.00, 'MAS-003', 'available'),
+('Porsche', '911 GT3', 2023, 1100.00, 'POR-004', 'available'),
+('Rolls Royce', 'Ghost', 2022, 1500.00, 'RR-005', 'available');
 
 -- ====== TRIGGERS ======
 
--- Trigger om automatisch auto status te veranderen naar 'rented' wanneer verhuurd
+-- Auto status op 'rented' zetten na verhuur
 CREATE OR REPLACE FUNCTION update_car_status_on_rental()
 RETURNS TRIGGER AS $$
 BEGIN
-    UPDATE cars SET status = 'rented'
+    UPDATE cars
+    SET status = 'rented'
     WHERE car_id = NEW.car_id;
     RETURN NEW;
 END;
@@ -78,12 +89,13 @@ AFTER INSERT ON rentals
 FOR EACH ROW
 EXECUTE FUNCTION update_car_status_on_rental();
 
--- Trigger om auto terug op 'available' te zetten na beëindigen huur
+-- Auto terug op 'available' zetten na huur beëindiging
 CREATE OR REPLACE FUNCTION set_car_available_on_rental_end()
 RETURNS TRIGGER AS $$
 BEGIN
     IF NEW.status = 'completed' THEN
-        UPDATE cars SET status = 'available'
+        UPDATE cars
+        SET status = 'available'
         WHERE car_id = NEW.car_id;
     END IF;
     RETURN NEW;
@@ -96,9 +108,9 @@ FOR EACH ROW
 WHEN (OLD.status != 'completed' AND NEW.status = 'completed')
 EXECUTE FUNCTION set_car_available_on_rental_end();
 
--- ====== STORED PROCEDURES ======
+-- ====== STORED PROCEDURE ======
 
--- Stored procedure voor nieuwe verhuur + betaling tegelijk aan te maken (met TRANSACTION)
+-- Verhuur en betaling tegelijk aanmaken
 CREATE OR REPLACE PROCEDURE create_rental_and_payment(
     p_user_id UUID,
     p_car_id INT,
@@ -110,51 +122,51 @@ CREATE OR REPLACE PROCEDURE create_rental_and_payment(
 )
 LANGUAGE plpgsql
 AS $$
+DECLARE
+    rental_id_created INT;
 BEGIN
-    -- Start transaction
-    BEGIN
-        -- Create rental
-        INSERT INTO rentals (user_id, car_id, start_date, end_date, total_price, status)
-        VALUES (p_user_id, p_car_id, p_start_date, p_end_date, p_total_price, 'ongoing')
-        RETURNING rental_id INTO STRICT rental_id_created;
+    INSERT INTO rentals (user_id, car_id, start_date, end_date, total_price, status)
+    VALUES (p_user_id, p_car_id, p_start_date, p_end_date, p_total_price, 'ongoing')
+    RETURNING rental_id INTO rental_id_created;
 
-        -- Create payment
-        INSERT INTO payments (rental_id, payment_date, amount, payment_method)
-        VALUES (rental_id_created, CURRENT_DATE, p_amount, p_payment_method);
-
-        -- Commit transaction
-        COMMIT;
-    EXCEPTION WHEN OTHERS THEN
-        -- Rollback bij fout
-        ROLLBACK;
-        RAISE;
-    END;
+    INSERT INTO payments (rental_id, payment_date, amount, payment_method)
+    VALUES (rental_id_created, CURRENT_DATE, p_amount, p_payment_method);
 END;
 $$;
 
--- ====== BACKUP & RECOVERY (commands voor pg_dump en psql) ======
+-- ====== ADMIN DASHBOARD VIEW ======
 
--- Maak een BACKUP:
--- Terminal (buiten SQL):
--- pg_dump -U your_user -d your_database_name -F c -b -v -f /path/to/backup_file.backup
+CREATE OR REPLACE VIEW admin_dashboard AS
+SELECT
+    r.rental_id,
+    u.name AS klant_naam,
+    u.email AS klant_email,
+    c.brand || ' ' || c.model AS auto,
+    r.start_date,
+    r.end_date,
+    r.status AS rental_status,
+    p.amount AS betaalde_bedrag,
+    p.payment_method,
+    p.payment_date,
+    c.status AS auto_status
+FROM rentals r
+JOIN users u ON r.user_id = u.user_id
+JOIN cars c ON r.car_id = c.car_id
+LEFT JOIN payments p ON r.rental_id = p.rental_id
+ORDER BY r.start_date DESC;
 
--- Herstel een BACKUP:
--- Terminal (buiten SQL):
--- pg_restore -U your_user -d your_database_name -v /path/to/backup_file.backup
+-- ====== EXTENSIE ======
 
--- (of exporteer in PGAdmin: Rechtsklik op database > Backup)
+-- Nodig voor UUID
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- ====== SECURITY ======
+-- ====== SECURITY: ROLLEN EN RECHTEN ======
 
--- Maak specifieke rollen aan
 CREATE ROLE rental_admin LOGIN PASSWORD 'AdminPassword123';
 CREATE ROLE rental_user LOGIN PASSWORD 'UserPassword123';
 
--- Rechten toekennen
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO rental_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO rental_admin;
 
--- Rollen beperken
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO rental_user;
-
