@@ -1,0 +1,29 @@
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Mijn Flask App{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+{% block head %}{% endblock %}
+
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="#">Home</a>  <!-- Geen daadwerkelijke link voor Home -->
+        <a href="#">Over</a>  <!-- Geen daadwerkelijke link voor About -->
+        <a href="#">Contact</a>  <!-- Geen daadwerkelijke link voor Contact -->
+        {% if session.get('user') %}
+            <a href="#">Uitloggen</a>  <!-- Geen daadwerkelijke link voor Uitloggen -->
+        {% else %}
+            <a href="#">Inloggen</a>  <!-- Geen daadwerkelijke link voor Login -->
+        {% endif %}
+    </nav>
+
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+
+</body>
+</html>
