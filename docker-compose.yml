@@ -9,6 +9,9 @@ services:
       - .ENV
     depends_on:
       - db
+    volumes:
+      - .:/app.py # live reload
+    command: python app.py # Start de app handmatig
 
 
   db:
@@ -20,6 +23,7 @@ services:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5433:5432"   # <-- hier naar 5433 veranderen, omdat andere port kan bezet zijn
+
   pgadmin:
     image: dpage/pgadmin4
     restart: always

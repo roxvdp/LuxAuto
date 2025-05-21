@@ -1,4 +1,6 @@
-flask
+Flask
 python-dotenv
-flask-sqlalchemy
+Flask-sqlalchemy
 psycopg2-binary
+authlib
+requests
