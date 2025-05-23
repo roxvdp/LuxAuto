@@ -11,7 +11,8 @@
 <body>
     <nav class="navbar">
         <a href="/"><img src="#"></a>
-        <a href="index.html">Home</a>
+        <a href="/">Home</a>
+        <a href="/auto">Auto's</a>
         <a href="#">Over</a>
         <a href="#">Contact</a>
         {% if session.get('user') %}
@@ -20,6 +21,10 @@
             <a class="button" href="/login">Inloggen</a>
         {% endif %}
     </nav>
+
+
+{% block content %}{% endblock %}
+
 
 </body>
 </html>
