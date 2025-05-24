@@ -1,10 +1,21 @@
 {% extends 'base.html' %}
 
-{% block head %}{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+<style>
+</style>
+{% endblock %}
 
 {% block content %}
     <h1>Welkom gebruiker</h1>
     <p>dit werkt</p>
+
+<footer id="footer">
+    <div class="footerbar">
+        <p>luxauto@gmail.com</p>
+    </div>
+</footer>
+
 {% endblock %}
 
 
