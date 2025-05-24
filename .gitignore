@@ -3,4 +3,8 @@
 .env
 .ENV
 
+__pycache__/
+*.pyc
+
+
 docker-compose.yml

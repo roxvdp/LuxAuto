@@ -31,7 +31,8 @@ def callback():
     oauth=current_app.oauth
     token = oauth.auth0.authorize_access_token()
     session["user"] = token
-    return redirect("/")
+    next_url = session.pop("next_url", None)
+    return redirect(next_url or url_for("routes.index"))
 
 
 # Uitgelogd en redirected naar home page
@@ -52,6 +53,14 @@ def logout():
 @routes.route('/')
 def index():
     return render_template('index.html')
+
+@routes.route('/profiel')
+def profiel():
+    if "user" not in session:
+        session["next_url"] = url_for("routes.profiel")
+        return redirect(url_for("routes.login"))
+    return render_template('profiel.html', user=session["user"])
+
 
 @routes.route('/auto')
 def auto():

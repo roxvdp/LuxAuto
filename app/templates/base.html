@@ -1,7 +1,7 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Mijn Flask App{% endblock %}</title>
+    <title>{% block title %}LuxAuto{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -26,12 +26,14 @@
     </nav>
 
     <div class="nav-knoppen">
-        {% if session.get('user') %}
-            <a class="button" href="/logout">Uitloggen</a>
-        {% else %}
-            <a class="button" href="/login">Inloggen</a>
-        {% endif %}
-    </div>
+    {% if session.get('user') %}
+        <a href="/profiel">Profiel</a>
+        <a href="/logout">Uitloggen</a>
+    {% else %}
+        <a href="/login">Inloggen</a>
+    {% endif %}
+</div>
+
 </header>
 {% endblock %}
 

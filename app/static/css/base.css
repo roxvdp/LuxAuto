@@ -67,20 +67,17 @@ header {
 }
 
 .nav-knoppen a {
-  text-decoration: none;
+    text-decoration: none;
     color: lightgray;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-weight: bold;
-  border: 2px solid white;
-  transition: all 0.3s ease;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: bold;
+    border: 2px solid white;
+    background: transparent;
+    transition: all 0.3s ease;
 }
 
-.nav-knoppen a:hover{
+.nav-knoppen a:hover {
     color: #333333;
-}
-
-.nav-knoppen:hover {
-  background: white;
-  border-radius: 20px;
+    background: white;
 }
