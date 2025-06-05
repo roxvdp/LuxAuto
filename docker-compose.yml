@@ -3,7 +3,7 @@ version: '3.9'
 services:
   web:
     build: .
-    container_name: luxauto_web
+    container_name: LuxAuto
     ports:
       - "8000:8000"
     env_file:
@@ -17,25 +17,28 @@ services:
 
   db:
     image: postgres:15
-    container_name: luxauto_db
+    container_name: LuxAuto_db
     env_file:
       - .ENV
-    environment:
-      TZ: Europe/Amsterdam
     volumes:
       - pgdata:/var/lib/postgresql/data
+    environment:
+      TZ: Europe/Amsterdam
     ports:
       - "5433:5432"   # <-- hier naar 5433 veranderen, omdat andere port kan bezet zijn
 
   pgadmin:
     image: dpage/pgadmin4
-    container_name: luxauto_pgadmin
+    container_name: LuxAuto_pgadmin
     env_file:
       - .ENV
     ports:
       - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - db
 
 volumes:
   pgdata:
+  pgadmin_data:
