@@ -8,13 +8,13 @@ from authlib.integrations.flask_client import OAuth
 
 # Laad .env file
 load_dotenv()
-
 # Initialiseer Flask
 app = Flask(__name__, template_folder='app/templates', static_folder='app/static')
 app.secret_key = getenv("APP_SECRET_KEY")
 
 # databank init
 app.config["SQLALCHEMY_DATABASE_URI"] = getenv("DATABASE_URL")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 
 # 0Auth instellen
