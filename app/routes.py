@@ -1,32 +1,23 @@
 import os
-from flask import Blueprint, render_template, session, redirect, url_for, current_app, request, jsonify
-import json
+from flask import Blueprint, render_template, session, redirect, url_for, current_app, request, jsonify, flash
 from os import environ as env
 from urllib.parse import quote_plus, urlencode
 from functools import wraps
-from app.database.models import LuxeAuto
-from app.database import db, SessionLocal
-import requests
-
-from authlib.integrations.flask_client import OAuth
+from app.database.models import LuxeAuto, ContactBericht
 from app.database import db
+import requests
 from dotenv import find_dotenv, load_dotenv
 
-
-# Maak een blueprint
 routes = Blueprint('routes', __name__)
-
 
 # .env en Auth0 configuratie
 ENV_FILE = find_dotenv()
 if ENV_FILE:
     load_dotenv(ENV_FILE)
 
-
-
 @routes.route("/login")
 def login():
-    oauth=current_app.oauth
+    oauth = current_app.oauth
     return oauth.auth0.authorize_redirect(
         redirect_uri=url_for("routes.callback", _external=True)
     )
@@ -53,8 +44,6 @@ def callback():
     next_url = session.pop("next_url", None)
     return redirect(next_url or url_for("routes.index"))
 
-
-# Uitgelogd en redirected naar home page
 @routes.route("/logout")
 def logout():
     session.clear()
@@ -68,22 +57,20 @@ def logout():
         )
     )
 
-
 ##############
-#Admin routes#
+# Admin-only #
 ##############
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        user_info = session.get("user") # checken of er is ingelogd
+        user_info = session.get("user")
         if not user_info:
-            return redirect(url_for("routes.login", next=request.path))
+            session["next_url"] = request.path
+            return redirect(url_for("routes.login"))
         email = user_info.get("userinfo", {}).get("email")
         if email != os.getenv("ADMIN_USER"):
             return "❌ Geen toegang: je hebt geen rechten voor deze pagina te bekijken.", 403
-
         return f(*args, **kwargs)
-
     return decorated_function
 
 @routes.route("/admin")
@@ -92,7 +79,7 @@ def admin():
     return render_template("admin.html")
 
 #####
-#API#
+# API
 #####
 @routes.route('/sync_cars', methods=['GET'])
 @admin_required
@@ -103,14 +90,12 @@ def sync_cars():
         return jsonify({"error": "Failed to fetch API data"}), 500
 
     cars = response.json()
-    session = SessionLocal()
+    session = db.session  # ✅ Gebruik Flask-SQLAlchemy sessie
 
     try:
         for car_data in cars:
-            # Look for existing car by license_plate
             existing_car = session.query(LuxeAuto).filter_by(license_plate=car_data['license_plate']).first()
             if existing_car:
-                # Update existing car fields
                 existing_car.brand = car_data['brand']
                 existing_car.model = car_data['model']
                 existing_car.year = car_data['year']
@@ -118,7 +103,6 @@ def sync_cars():
                 existing_car.available = car_data['available']
                 existing_car.foto_url = car_data.get('foto_url', 'img/default_car.jpg')
             else:
-                # Create new car
                 new_car = LuxeAuto(
                     brand=car_data['brand'],
                     model=car_data['model'],
@@ -139,11 +123,9 @@ def sync_cars():
 
     return jsonify({"message": "Cars synced successfully."})
 
-
 ##########
-#ALGEMEEN#
+# Algemeen
 ##########
-# Terugkomst van ingelogde mensen of bezoekers
 @routes.route('/')
 def index():
     return render_template('index.html')
@@ -155,8 +137,54 @@ def profiel():
         return redirect(url_for("routes.login"))
     return render_template('profiel.html', user=session["user"])
 
-
 @routes.route("/auto")
 def autos():
     beschikbare_autos = db.session.query(LuxeAuto).filter_by(available=True).all()
     return render_template("auto.html", autos=beschikbare_autos)
+
+@routes.route('/auto/<int:auto_id>')
+def auto_detail(auto_id):
+    auto = db.session.query(LuxeAuto).get(auto_id)
+    if not auto:
+        return render_template("404.html"), 404
+    return render_template("auto_detail.html", auto=auto)
+
+
+
+@routes.route("/contact", methods=["GET", "POST"])
+def contact():
+    if request.method == "POST":
+        naam = request.form.get("naam", "").strip()
+        email = request.form.get("email", "").strip()
+        onderwerp = request.form.get("onderwerp", "").strip()
+        telefoon = request.form.get("telefoon", "").strip()
+        bericht = request.form.get("bericht", "").strip()
+
+        if not all([naam, email, onderwerp, bericht]):
+            flash("Alle verplichte velden moeten ingevuld zijn.")
+            return render_template("contact.html")
+
+        nieuw_bericht = ContactBericht(
+            naam=naam,
+            email=email,
+            onderwerp=onderwerp,
+            telefoon=telefoon or None,
+            bericht=bericht
+        )
+        try:
+            db.session.add(nieuw_bericht)
+            db.session.commit()
+            return redirect(url_for("routes.contact_bevestiging"))
+        except Exception as e:
+            db.session.rollback()
+            flash("Er is iets fout gegaan bij het verzenden van je bericht.")
+            print(f"Contact fout: {e}")  # Bekijk deze fout in console/log
+            return render_template("contact.html")
+
+    return render_template("contact.html")
+
+
+
+@routes.route("/contact/bevestiging")
+def contact_bevestiging():
+    return render_template("contact_bevestiging.html")

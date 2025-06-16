@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="auto-detail">
+    <h2>{{ auto.brand }} {{ auto.model }} ({{ auto.year }})</h2>
+    <img src="{{ url_for('static', filename=auto.foto_url) }}" alt="Foto van {{ auto.brand }}">
+    <p>Prijs per dag: €{{ auto.price }}</p>
+    <p>Nummerplaat: {{ auto.license_plate }}</p>
+    <a href="#" class="btn btn-primary">Reserveer nu</a>
+  </div>
+{% endblock %}
