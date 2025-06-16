@@ -4,3 +4,6 @@ Flask-sqlalchemy
 psycopg2-binary
 authlib
 requests
+Flask-SQLAlchemy
+alembic
+stripe
