@@ -1,42 +1,44 @@
-services:
-  db:
-    image: postgres:15
-    container_name: LuxAuto_db
-    restart: always
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin123
-      POSTGRES_DB: autolux_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+version: '3.9'
 
+services:
   web:
     build: .
     container_name: LuxAuto
-    restart: always
     ports:
       - "8000:8000"
+    env_file:
+      - .ENV
     depends_on:
       - db
+    volumes:
+      - .:/app # live reload
+    command: python app.py # Start de app handmatig
+
+
+  db:
+    image: postgres:15
+    container_name: LuxAuto_db
     env_file:
-      - .env
+      - .ENV
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      TZ: Europe/Amsterdam
+    ports:
+      - "5433:5432"
 
   pgadmin:
     image: dpage/pgadmin4
     container_name: LuxAuto_pgadmin
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: luxe@auto.com
-      PGADMIN_DEFAULT_PASSWORD: LuxeAuto123
+    env_file:
+      - .ENV
     ports:
       - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - db
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin  # ← permanent PGAdmin serveropslag
 
 volumes:
-  postgres_data:
+  pgdata:
   pgadmin_data:
