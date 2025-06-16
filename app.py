@@ -6,17 +6,26 @@ from app.routes import routes
 from authlib.integrations.flask_client import OAuth
 from app.database import init_app as init_db  # ✅ toegevoegd
 
-# Laad .env file
+# ✅ Stap 1: Laad .env
 load_dotenv()
 
-# Initialiseer Flask
+# ✅ Stap 2: Initialiseer Flask
 app = Flask(__name__, template_folder='app/templates', static_folder='app/static')
 app.secret_key = getenv("APP_SECRET_KEY")
 
-# Database koppelen
-init_db(app)  # ✅ toegevoegd
+# ✅ Stap 3: Stel database URI in vóór init_db
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    f"postgresql://{getenv('POSTGRES_USER')}:{getenv('POSTGRES_PASSWORD')}"
+    f"@{getenv('POSTGRES_HOST')}:{getenv('POSTGRES_PORT')}/{getenv('POSTGRES_DB')}"
+)
 
-# Auth0
+# (optioneel) print debug
+print("Database URI:", app.config['SQLALCHEMY_DATABASE_URI'])
+
+# ✅ Stap 4: Init DB
+init_db(app)
+
+# ✅ Stap 5: Auth0
 oauth = OAuth(app)
 oauth.register(
     "auth0",
@@ -29,7 +38,7 @@ oauth.register(
 )
 app.oauth = oauth
 
-# Blueprints
+# ✅ Stap 6: Blueprints
 app.register_blueprint(routes)
 
 if __name__ == '__main__':

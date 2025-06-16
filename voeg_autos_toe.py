@@ -8,7 +8,7 @@ load_dotenv()
 # Voeg projectpad toe
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from main import app  # Flask-app vanuit main.py
+from app import app  # Flask-app vanuit app.py
 from app.database import db
 from app.database.models import LuxeAuto
 

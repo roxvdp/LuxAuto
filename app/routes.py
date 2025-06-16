@@ -4,8 +4,9 @@ import json
 from os import environ as env
 from urllib.parse import quote_plus, urlencode
 from functools import wraps
-
+from app.database.models import LuxeAuto
 from authlib.integrations.flask_client import OAuth
+from app.database import db
 from dotenv import find_dotenv, load_dotenv
 
 
@@ -105,6 +106,7 @@ def profiel():
     return render_template('profiel.html', user=session["user"])
 
 
-@routes.route('/auto')
-def auto():
-    return render_template('auto.html')
+@routes.route("/auto")
+def autos():
+    beschikbare_autos = db.session.query(LuxeAuto).filter_by(available=True).all()
+    return render_template("auto.html", autos=beschikbare_autos)
