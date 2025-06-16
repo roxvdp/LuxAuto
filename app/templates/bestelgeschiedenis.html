@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Mijn Bestelgeschiedenis{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bestelgeschiedenis.css') }}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Mijn Bestelgeschiedenis</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            Overzicht van uw bestellingen
+        </div>
+        <div class="card-body">
+            {% if orders %}
+                <ul class="list-group">
+                    {% for order in orders %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Bestelling #{{ order.id }} - Datum: {{ order.date.strftime('%Y-%m-%d') }}
+                            <span class="badge bg-secondary rounded-pill">Status: {{ order.status }}</span>
+                            <a href="{{ url_for('routes.order_details', order_id=order.id) }}" class="btn btn-sm btn-outline-primary">Details</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">U heeft nog geen bestellingen geplaatst.</p>
+                <a href="{{ url_for('routes.index') }}" class="btn btn-primary">Bekijk ons aanbod</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

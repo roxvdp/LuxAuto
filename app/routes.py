@@ -158,7 +158,7 @@ def profiel():
     if "user" not in session:
         session["next_url"] = url_for("routes.profiel")
         return redirect(url_for("routes.login"))
-    return render_template('profiel.html', user=session["user"])
+    return render_template('profile.html', user=session["user"])
 
 @routes.route("/auto")
 def autos():
@@ -171,6 +171,45 @@ def auto_detail(auto_id):
     if not auto:
         return render_template("404.html"), 404
     return render_template("auto_detail.html", auto=auto)
+
+@routes.route('/instellingen', methods=['GET', 'POST'])
+def instellingen():
+    if "user" not in session:
+        session["next_url"] = url_for("routes.instellingen")
+        return redirect(url_for("routes.login"))
+
+    db_session = SessionLocal()
+    gebruiker = db_session.query(Usertable).filter_by(id=session["user"]["db_id"]).first()
+
+    if request.method == 'POST':
+        gebruiker.voornaam = request.form.get('voornaam')
+        gebruiker.achternaam = request.form.get('achternaam')
+        gebruiker.telefoonnummer = request.form.get('telefoonnummer')
+        gebruiker.adres = request.form.get('adres')
+        gebruiker.email = request.form.get('email')
+        db_session.commit()
+        db_session.close()
+
+        from flask import flash
+        flash("Instellingen succesvol opgeslagen.", "success")
+        return redirect(url_for('routes.profiel'))
+
+    db_session.close()
+    return render_template("instellingen.html", gebruiker=gebruiker)
+
+@routes.route('/bestelgeschiedenis')
+def bestelgeschiedenis():
+    if "user" not in session:
+        session["next_url"] = url_for("routes.bestelgeschiedenis")
+        return redirect(url_for("routes.login"))
+    return render_template('bestelgeschiedenis.html', user=session["user"])
+
+@routes.route('/favorieten')
+def favorieten():
+    if "user" not in session:
+        session["next_url"] = url_for("routes.favorieten")
+        return redirect(url_for("routes.login"))
+    return render_template('favorieten.html', user=session["user"])
 
 @routes.route('/auto')
 def auto():

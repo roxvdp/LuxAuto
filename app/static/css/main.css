@@ -6,3 +6,77 @@
     align-items: center;
     padding: 10px;
 }
+
+/* Algemene body styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa; /* Lichte achtergrondkleur */
+    color: #333;
+}
+
+/* Hoofdstijlen voor de cards */
+.card.main-card {
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px; /* Ruimte tussen de kaarten */
+}
+
+.card.main-card img.card-img {
+    width: 100%;
+    height: auto; /* Zorg ervoor dat de hoogte van de afbeeldingen consistent is of flexibel blijft */
+    object-fit: cover; /* Bedek het gebied zonder de verhoudingen te vervormen */
+    filter: brightness(0.7); /* Maak de afbeelding donkerder zodat tekst beter leesbaar is */
+}
+
+.card-img-overlay {
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 50%); /* Gradiënt voor betere tekstleesbaarheid */
+    padding: 20px;
+    color: white;
+}
+
+.card-title {
+    font-weight: bold;
+    font-size: 1.8rem;
+}
+
+.card-text.lead {
+    font-size: 1.1rem;
+}
+
+/* Specifieke styling voor de zoekbalk */
+.zoek-formulier .form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.zoek-formulier .btn-primary {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* Stijl voor de kleinere kaartjes */
+.card.small-card {
+    height: 250px; /* Vaste hoogte voor de kleinere kaarten */
+}
+
+.card.small-card img.card-img {
+    height: 100%;
+    filter: brightness(0.7);
+}
+
+/* Badges styling */
+.badge {
+    border-radius: 0 0 10px 0; /* Alleen linksonder en rechtsonder afgerond */
+    padding: 8px 12px;
+    font-weight: bold;
+}
+
+/* Footer styling */
+#footer {
+    background-color: #222; /* Donkere achtergrond */
+    color: #eee;
+    text-align: center;
+    padding: 15px 0;
+}
