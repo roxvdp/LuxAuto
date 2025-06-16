@@ -11,13 +11,11 @@ class Usertable(Base):
     id = Column(Integer, primary_key=True)                          # Interne ID
     user_id = Column(String, unique=True)                           # Auth0 User ID
     email = Column(String, unique=True, nullable=False)             # Uniek e-mailadres
-    name = Column(String)                                           # Volledige naam van Auth0
+    naam = Column(String)                                           # Volledige naam van Auth0
     voornaam = Column(String)                                       # Gebruiker voornaam
     achternaam = Column(String)                                     # Gebruiker achternaam
     telefoonnummer = Column(String)                                 # Contactnummer
-    adres = Column(String)                                          # Woonadres
-    taal = Column(String, default="nl")                             # Interface-taal
-    darkmode = Column(String, default="False")                      # UI-thema keuze
+    adres = Column(String)                                          # Woonadres                     # UI-thema keuze
 
     reservaties = relationship("Reservatie", back_populates="gebruiker", cascade="all, delete-orphan")  # Koppeling naar reservaties
 
@@ -29,12 +27,9 @@ class LuxeAuto(Base):
     id = Column(Integer, primary_key=True)                          # Auto-ID
     merk = Column(String, nullable=False)                           # Merk, bv. "Audi"
     model = Column(String, nullable=False)                          # Model, bv. "Q7"
-    bouwjaar = Column(Integer, nullable=False)                      # Bouwjaar, bv. 2022
     prijs_per_dag = Column(DECIMAL, nullable=False)                # Dagprijs in €
     nummerplaat = Column(String, unique=True, nullable=False)       # Unieke nummerplaat
     beschikbaar = Column(Boolean, default=True)                     # Verhuurstatus
-    brandstof = Column(String)                                      # Brandstoftype: benzine/diesel/elektrisch
-    transmissie = Column(String)                                    # Automaat of manueel
     foto_url = Column(String, default="img/default_car.jpg")        # Foto van de wagen
 
     reservaties = relationship("Reservatie", back_populates="auto") # Koppeling naar reservaties
@@ -69,19 +64,6 @@ class ContactBericht(Base):
     bericht = Column(Text, nullable=False)                          # De inhoud van het bericht
     datum = Column(DateTime, default=datetime.utcnow)               # Tijdstip van verzending
 
-
-# 5️⃣ Onderhoudshistoriek van auto's
-class Onderhoud(Base):
-    __tablename__ = "onderhoud"
-
-    id = Column(Integer, primary_key=True)                          # Onderhouds-ID
-    auto_id = Column(Integer, ForeignKey("luxe_autos.id"))          # Koppeling met auto
-    datum = Column(DateTime, default=datetime.utcnow)               # Wanneer onderhoud gebeurde
-    omschrijving = Column(String)                                   # Wat werd uitgevoerd
-    kostprijs = Column(DECIMAL)                                     # Optionele kost
-    voltooid = Column(Boolean, default=False)                       # Status voltooid of niet
-
-    auto = relationship("LuxeAuto", back_populates="onderhoud")     # Relatie met de auto
 
 
 # 6️⃣ Beoordelingen van auto's door klanten
