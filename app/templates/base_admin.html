@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}LuxAuto Admin{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base_admin.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+{% block head %}{% endblock %}
+
+</head>
+<body>
+<div class="sidebar collapsed" id="sidebar">
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+
+  <a href="/admin">
+    <span class="icon">🏠</span>
+    <span class="label">Admin</span>
+  </a>
+  <a href="/#">
+    <span class="icon">#</span>
+    <span class="label">#</span>
+  </a>
+  <a href="#">
+    <span class="icon">#</span>
+    <span class="label">#</span>
+  </a>
+  <a href="#">
+    <span class="icon">#</span>
+    <span class="label">#</span>
+  </a>
+  <a href="/">
+    <span class="icon">🏡</span>
+    <span class="label">Home</span>
+  </a>
+  <a href="#">
+    <span class="icon">🚪</span>
+    <span class="label">Logout</span>
+  </a>
+</div>
+
+
+<div class="main-content collapsed" id="main-content">
+    {% block content %}{% endblock %}
+</div>
+
+<script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
+
+</body>
+</html>

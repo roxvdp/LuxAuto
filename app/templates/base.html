@@ -27,13 +27,16 @@
 
     <div class="nav-knoppen">
     {% if session.get('user') %}
+        {% if session.get('is_admin') %}
+            <a href="/admin">Admin</a>
+        {% endif %}
         <a href="/profiel">Profiel</a>
         <a href="/logout">Uitloggen</a>
     {% else %}
         <a href="/login">Inloggen</a>
+        <a href="/signup">Aanmelden</a>
     {% endif %}
 </div>
-
 </header>
 {% endblock %}
 
