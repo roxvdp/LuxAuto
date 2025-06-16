@@ -4,7 +4,7 @@ from os import environ as env
 from urllib.parse import quote_plus, urlencode
 from functools import wraps
 from app.database.models import LuxeAuto, Usertable,ContactBericht
-from app.database import db, SessionLocal
+from app.database import db
 
 import requests
 from dotenv import find_dotenv, load_dotenv
@@ -43,7 +43,6 @@ def callback():
     email = userinfo.get("email")
     naam = userinfo.get("name")
 
-    db = SessionLocal()
 
     # Try to find user in DB
     user = db.query(Usertable).filter_by(user_id=auth0_user_id).first()
@@ -177,3 +176,41 @@ def auto_detail(auto_id):
 @routes.route('/auto')
 def auto():
     return render_template('auto.html')
+
+@routes.route("/contact", methods=["GET", "POST"])
+def contact():
+    if request.method == "POST":
+        naam = request.form.get("naam", "").strip()
+        email = request.form.get("email", "").strip()
+        onderwerp = request.form.get("onderwerp", "").strip()
+        telefoon = request.form.get("telefoon", "").strip()
+        bericht = request.form.get("bericht", "").strip()
+
+        if not all([naam, email, onderwerp, bericht]):
+            flash("Alle verplichte velden moeten ingevuld zijn.")
+            return render_template("contact.html")
+
+        nieuw_bericht = ContactBericht(
+            naam=naam,
+            email=email,
+            onderwerp=onderwerp,
+            telefoon=telefoon or None,
+            bericht=bericht
+        )
+        try:
+            db.session.add(nieuw_bericht)
+            db.session.commit()
+            return redirect(url_for("routes.contact_bevestiging"))
+        except Exception as e:
+            db.session.rollback()
+            flash("Er is iets fout gegaan bij het verzenden van je bericht.")
+            print(f"Contact fout: {e}")  # Bekijk deze fout in console/log
+            return render_template("contact.html")
+
+    return render_template("contact.html")
+
+
+
+@routes.route("/contact/bevestiging")
+def contact_bevestiging():
+    return render_template("contact_bevestiging.html")
