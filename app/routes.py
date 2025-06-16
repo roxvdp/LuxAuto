@@ -3,8 +3,9 @@ from flask import Blueprint, render_template, session, redirect, url_for, curren
 from os import environ as env
 from urllib.parse import quote_plus, urlencode
 from functools import wraps
-from app.database.models import LuxeAuto, ContactBericht
-from app.database import db
+from app.database.models import LuxeAuto, Usertable,ContactBericht
+from app.database import db, SessionLocal
+
 import requests
 from dotenv import find_dotenv, load_dotenv
 
@@ -37,9 +38,33 @@ def callback():
     token = oauth.auth0.authorize_access_token()
     userinfo = oauth.auth0.userinfo(token=token)
 
-    session["user"] = {"userinfo": userinfo}
+    # Extract relevant fields from userinfo
+    auth0_user_id = userinfo.get("sub")    # Unique Auth0 user ID
     email = userinfo.get("email")
+    naam = userinfo.get("name")
+
+    db = SessionLocal()
+
+    # Try to find user in DB
+    user = db.query(Usertable).filter_by(user_id=auth0_user_id).first()
+
+    if not user:
+        user = Usertable(
+            user_id=auth0_user_id,
+            email=email,
+            naam=naam,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    session["user"] = {
+        "userinfo": userinfo,
+        "db_id": user.id,
+    }
     session["is_admin"] = (email == os.getenv("ADMIN_USER"))
+
+    db.close()
 
     next_url = session.pop("next_url", None)
     return redirect(next_url or url_for("routes.index"))
@@ -149,42 +174,6 @@ def auto_detail(auto_id):
         return render_template("404.html"), 404
     return render_template("auto_detail.html", auto=auto)
 
-
-
-@routes.route("/contact", methods=["GET", "POST"])
-def contact():
-    if request.method == "POST":
-        naam = request.form.get("naam", "").strip()
-        email = request.form.get("email", "").strip()
-        onderwerp = request.form.get("onderwerp", "").strip()
-        telefoon = request.form.get("telefoon", "").strip()
-        bericht = request.form.get("bericht", "").strip()
-
-        if not all([naam, email, onderwerp, bericht]):
-            flash("Alle verplichte velden moeten ingevuld zijn.")
-            return render_template("contact.html")
-
-        nieuw_bericht = ContactBericht(
-            naam=naam,
-            email=email,
-            onderwerp=onderwerp,
-            telefoon=telefoon or None,
-            bericht=bericht
-        )
-        try:
-            db.session.add(nieuw_bericht)
-            db.session.commit()
-            return redirect(url_for("routes.contact_bevestiging"))
-        except Exception as e:
-            db.session.rollback()
-            flash("Er is iets fout gegaan bij het verzenden van je bericht.")
-            print(f"Contact fout: {e}")  # Bekijk deze fout in console/log
-            return render_template("contact.html")
-
-    return render_template("contact.html")
-
-
-
-@routes.route("/contact/bevestiging")
-def contact_bevestiging():
-    return render_template("contact_bevestiging.html")
+@routes.route('/auto')
+def auto():
+    return render_template('auto.html')
