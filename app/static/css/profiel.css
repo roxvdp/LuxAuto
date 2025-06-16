@@ -1,0 +1,71 @@
+/* static/css/profile.css */
+
+/* Algemene styling voor de profielpagina */
+body {
+    background-color: #f4f7f6; /* Een iets andere achtergrondkleur voor variatie */
+}
+
+/* Styling voor de navigatieknoppen sectie */
+.nav-buttons {
+    margin-top: 20px;
+    margin-bottom: 30px;
+    display: flex; /* Zorgt ervoor dat knoppen naast elkaar staan */
+    gap: 15px; /* Ruimte tussen de knoppen */
+    flex-wrap: wrap; /* Knoppen gaan naar nieuwe lijn op kleine schermen */
+}
+
+.nav-button {
+    padding: 10px 20px;
+    background-color: #007bff; /* Standaard Bootstrap primary kleur */
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    flex-grow: 1; /* Zorgt dat knoppen meegroeien in flexbox */
+    text-align: center;
+    /* Om te voorkomen dat tekst te lang wordt en knop uitrekt */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav-button:hover {
+    background-color: #0056b3;
+    color: white; /* Zorg dat tekst wit blijft bij hover */
+}
+
+/* Stijl voor de profielinformatie kaart */
+.profile-card {
+    border: 1px solid rgba(0, 0, 0, 0.125); /* Voegt een lichte rand toe */
+    border-radius: 0.25rem; /* Standaard Bootstrap randradius */
+}
+
+.profile-card .card-header {
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: 0.75rem 1.25rem; /* Standaard Bootstrap padding */
+}
+
+.profile-card .card-body {
+    padding: 1.25rem; /* Standaard Bootstrap padding */
+}
+
+.profile-card dl dt {
+    font-weight: 600; /* Maakt de labels iets vetter */
+    margin-bottom: 0.5rem; /* Ruimte onder de labels */
+}
+
+.profile-card dl dd {
+    margin-bottom: 0.5rem; /* Ruimte onder de waarden */
+}
+
+/* Stijl voor de optionele sectie onder het profiel */
+.card.mt-4 {
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 0.25rem;
+}
+
+.card-header.bg-info {
+    background-color: #17a2b8 !important; /* Overwrite Bootstrap default if needed */
+    color: white;
+}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Mijn Favorieten{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/favorieten.css') }}">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Mijn Favoriete Auto's</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+            Uw bewaarde favorieten
+        </div>
+        <div class="card-body">
+            {% if favorites %}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    {% for auto in favorites %}
+                        <div class="col">
+                            <div class="card h-100">
+                                <img src="{{ url_for('static', filename='img/' + auto.image_filename) }}" class="card-img-top" alt="{{ auto.model }}">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ auto.merk }} {{ auto.model }}</h5>
+                                    <p class="card-text">Prijs: &euro;{{ auto.prijs }} per dag</p>
+                                    <a href="{{ url_for('routes.auto_details', auto_id=auto.id) }}" class="btn btn-primary">Bekijk</a>
+                                    <button class="btn btn-danger btn-sm float-end">Verwijder</button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">U heeft nog geen favoriete auto's opgeslagen.</p>
+                <a href="{{ url_for('routes.index') }}" class="btn btn-primary">Ontdek auto's</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

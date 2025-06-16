@@ -8,6 +8,7 @@ from authlib.integrations.flask_client import OAuth
 
 # Laad .env file
 load_dotenv()
+
 # Initialiseer Flask
 app = Flask(__name__, template_folder='app/templates', static_folder='app/static')
 app.secret_key = getenv("APP_SECRET_KEY")
