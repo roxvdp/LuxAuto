@@ -14,7 +14,7 @@
     {% if autos %}
         {% for auto in autos %}
         <div class="auto-card">
-            <img src="{{ url_for('static', filename=auto.foto_url) }}" alt="Foto van {{ auto.brand }} {{ auto.model }}">
+            <img src="{{ auto.foto_url }}" alt="Foto van {{ auto.brand }} {{ auto.model }}">
             <div class="auto-info">
                 <h3>{{ auto.brand }} {{ auto.model }}</h3>
                 <p>Bouwjaar: {{ auto.year }}</p>

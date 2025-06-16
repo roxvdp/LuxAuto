@@ -113,6 +113,11 @@ def sync_cars():
         return jsonify({"error": "Failed to fetch API data"}), 500
 
     cars = response.json()
+
+    # Debug print to check foto_url before syncing
+    for car_data in cars:
+        print(f"Syncing car {car_data['license_plate']}: foto_url = {car_data.get('foto_url')}")
+
     session = db.session  # ✅ Gebruik Flask-SQLAlchemy sessie
 
     try:
@@ -124,7 +129,7 @@ def sync_cars():
                 existing_car.year = car_data['year']
                 existing_car.price = car_data['price']
                 existing_car.available = car_data['available']
-                existing_car.foto_url = car_data.get('foto_url', 'img/default_car.jpg')
+                existing_car.foto_url = car_data.get('foto_url')
             else:
                 new_car = LuxeAuto(
                     brand=car_data['brand'],
@@ -133,7 +138,7 @@ def sync_cars():
                     price=car_data['price'],
                     license_plate=car_data['license_plate'],
                     available=car_data['available'],
-                    foto_url=car_data.get('foto_url', 'img/default_car.jpg')
+                    foto_url=car_data.get('foto_url')
                 )
                 session.add(new_car)
 
