@@ -161,9 +161,18 @@ def index():
 @routes.route('/profiel')
 def profiel():
     if "user" not in session:
-        session["next_url"] = url_for("routes.profiel")
+        flash("Je bent niet ingelogd", "warning")
         return redirect(url_for("routes.login"))
-    return render_template('profile.html', user=session["user"])
+
+    db_id = session["user"].get("db_id")
+    if not db_id:
+        flash("Ongeldige sessiegegevens.", "danger")
+        return redirect(url_for("routes.login"))
+
+    db_session = SessionLocal()
+    gebruiker = db_session.query(Usertable).filter_by(id=db_id).first()
+
+    return render_template("profile.html", gebruiker=gebruiker)
 
 @routes.route("/auto")
 def autos():
