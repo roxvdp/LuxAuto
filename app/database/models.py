@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, DECIMAL, Boolean, Text
+from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, DECIMAL, Boolean, Text, CheckConstraint
 from sqlalchemy.orm import declarative_base, relationship
 from datetime import datetime
 
@@ -25,15 +25,15 @@ class LuxeAuto(Base):
     __tablename__ = "luxe_autos"
 
     id = Column(Integer, primary_key=True)                          # Auto-ID
-    merk = Column(String, nullable=False)                           # Merk, bv. "Audi"
-    model = Column(String, nullable=False)                          # Model, bv. "Q7"
-    prijs_per_dag = Column(DECIMAL, nullable=False)                # Dagprijs in €
-    nummerplaat = Column(String, unique=True, nullable=False)       # Unieke nummerplaat
-    beschikbaar = Column(Boolean, default=True)                     # Verhuurstatus
+    brand = Column(String, nullable=False)                           # Merk, bv. "Audi"
+    model = Column(String, nullable=False)                             # Model, bv. "Q7"
+    year = Column(Integer, nullable=False)
+    price = Column(DECIMAL, nullable=False)                # Dagprijs in €
+    license_plate = Column(String, unique=True, nullable=False)       # Unieke nummerplaat
+    available = Column(Boolean, default=True)                     # Verhuurstatus
     foto_url = Column(String, default="img/default_car.jpg")        # Foto van de wagen
 
     reservaties = relationship("Reservatie", back_populates="auto") # Koppeling naar reservaties
-    onderhoud = relationship("Onderhoud", back_populates="auto")    # Koppeling naar onderhoudshistoriek
 
 
 # 3️⃣ Reservaties van auto's door gebruikers
@@ -66,13 +66,19 @@ class ContactBericht(Base):
 
 
 
-# 6️⃣ Beoordelingen van auto's door klanten
+# 5️⃣ Beoordelingen van auto's door klanten
 class Beoordeling(Base):
     __tablename__ = "beoordelingen"
+    __table_args__ = (
+        CheckConstraint('score >= 1 AND score <= 5', name='check_score_range'),
+    )
 
     id = Column(Integer, primary_key=True)                          # Beoordeling-ID
-    auto_id = Column(Integer, ForeignKey("luxe_autos.id"))          # Gekoppelde auto
-    gebruiker_id = Column(Integer, ForeignKey("gebruikers.id"))     # Gekoppelde gebruiker
+    auto_id = Column(Integer, ForeignKey("luxe_autos.id"),  nullable=False)          # Gekoppelde auto
+    gebruiker_id = Column(Integer, ForeignKey("gebruikers.id"), nullable=False)     # Gekoppelde gebruiker
     score = Column(Integer, nullable=False)                         # Score: 1–5
     commentaar = Column(Text)                                       # Vrije tekst
     datum = Column(DateTime, default=datetime.utcnow)               # Datum van beoordeling
+
+    gebruiker = relationship("Usertable")
+    auto = relationship("LuxeAuto")
