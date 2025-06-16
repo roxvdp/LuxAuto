@@ -4,7 +4,7 @@ import json
 from os import environ as env
 from urllib.parse import quote_plus, urlencode
 from functools import wraps
-from app.database.models import LuxeAuto
+from app.database.models import LuxeAuto, Usertable
 from app.database import db, SessionLocal
 import requests
 
@@ -45,9 +45,33 @@ def callback():
     token = oauth.auth0.authorize_access_token()
     userinfo = oauth.auth0.userinfo(token=token)
 
-    session["user"] = {"userinfo": userinfo}
+    # Extract relevant fields from userinfo
+    auth0_user_id = userinfo.get("sub")    # Unique Auth0 user ID
     email = userinfo.get("email")
+    naam = userinfo.get("name")
+
+    db = SessionLocal()
+
+    # Try to find user in DB
+    user = db.query(Usertable).filter_by(user_id=auth0_user_id).first()
+
+    if not user:
+        user = Usertable(
+            user_id=auth0_user_id,
+            email=email,
+            naam=naam,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    session["user"] = {
+        "userinfo": userinfo,
+        "db_id": user.id,
+    }
     session["is_admin"] = (email == os.getenv("ADMIN_USER"))
+
+    db.close()
 
     next_url = session.pop("next_url", None)
     return redirect(next_url or url_for("routes.index"))
