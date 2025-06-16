@@ -11,17 +11,23 @@
 <p>Kies uit ons exclusieve aanbod van huurwagens.</p>
 
 <div class="autos-container">
-    {% for auto in autos %}
-    <div class="auto-card">
-        <img src="{{ url_for('static', filename=auto.foto_url) }}" alt="Foto van {{ auto.brand }} {{ auto.model }}">
-        <div class="auto-info">
-            <h3>{{ auto.brand }} {{ auto.model }}</h3>
-            <p>Bouwjaar: {{ auto.year }}</p>
-            <p>Prijs per dag: €{{ '{:.2f}'.format(auto.price) }}</p>
-            <p>Nummerplaat: {{ auto.license_plate }}</p>
-            <a href="{{ url_for('auto_detail', auto_id=auto.id) }}" class="btn-huur">Huur of reserveer mij</a>
+    {% if autos %}
+        {% for auto in autos %}
+        <div class="auto-card">
+            <img src="{{ url_for('static', filename=auto.foto_url) }}" alt="Foto van {{ auto.brand }} {{ auto.model }}">
+            <div class="auto-info">
+                <h3>{{ auto.brand }} {{ auto.model }}</h3>
+                <p>Bouwjaar: {{ auto.year }}</p>
+                <p>Prijs per dag: €{{ '{:.2f}'.format(auto.price) }}</p>
+                <p>Nummerplaat: {{ auto.license_plate }}</p>
+                <a href="{{ url_for('auto_detail', auto_id=auto.id) }}" class="btn-huur">Huur of reserveer mij</a>
+            </div>
         </div>
-    </div>
-    {% endfor %}
+        {% endfor %}
+    {% else %}
+        <div class="geen-autos">
+            <p>🚗 Er zijn momenteel geen auto's beschikbaar voor verhuur. Kom later zeker nog eens terug!</p>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
