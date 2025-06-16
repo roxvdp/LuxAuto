@@ -176,8 +176,29 @@ def profiel():
     if "user" not in session:
         session["next_url"] = url_for("routes.profiel")
         return redirect(url_for("routes.login"))
-    return render_template('profiel.html', user=session["user"])
+    return render_template('profile.html', user=session["user"])
 
+
+@routes.route('/instellingen')
+def instellingen():
+    if "user" not in session:
+        session["next_url"] = url_for("routes.instellingen")
+        return redirect(url_for("routes.login"))
+    return render_template('instellingen.html', user=session["user"])
+
+@routes.route('/bestelgeschiedenis')
+def bestelgeschiedenis():
+    if "user" not in session:
+        session["next_url"] = url_for("routes.bestelgeschiedenis")
+        return redirect(url_for("routes.login"))
+    return render_template('bestelgeschiedenis.html', user=session["user"])
+
+@routes.route('/favorieten')
+def favorieten():
+    if "user" not in session:
+        session["next_url"] = url_for("routes.favorieten")
+        return redirect(url_for("routes.login"))
+    return render_template('favorieten.html', user=session["user"])
 
 @routes.route('/auto')
 def auto():
