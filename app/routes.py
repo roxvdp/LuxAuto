@@ -4,7 +4,7 @@ from os import environ as env
 from urllib.parse import quote_plus, urlencode
 from functools import wraps
 from app.database.models import LuxeAuto, Usertable,ContactBericht
-from app.database import db
+from app.database import db, SessionLocal
 
 import requests
 from dotenv import find_dotenv, load_dotenv
