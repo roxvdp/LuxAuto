@@ -1,0 +1,17 @@
+/* app/static/css/favorieten.css */
+
+/* Specifieke styling voor de favorieten pagina */
+body {
+    background-color: #f8f9fa; /* Lichte achtergrondkleur */
+}
+
+.card-header {
+    font-weight: bold;
+}
+
+.card-img-top {
+    height: 180px; /* Vaste hoogte voor afbeeldingen in favorieten kaartjes */
+    object-fit: cover;
+}
+
+/* Voeg eventueel meer stijlen toe voor de cards */

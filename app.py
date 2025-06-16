@@ -14,7 +14,7 @@ app = Flask(__name__, template_folder='app/templates', static_folder='app/static
 app.secret_key = getenv("APP_SECRET_KEY")
 
 # databank init
-app.config["SQLALCHEMY_DATABASE_URI"] = getenv("DATABASE_URL")
+app.config["SQLALCHEMY_DATABASE_URI"] = getenv("SQLALCHEMY_DATABASE_URI")
 db.init_app(app)
 
 # 0Auth instellen
