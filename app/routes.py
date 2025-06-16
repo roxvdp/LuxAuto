@@ -118,7 +118,8 @@ def profiel():
     user_id = session["user"]["userinfo"]["sub"]
     gebruiker = db.session.query(Usertable).filter_by(user_id=user_id).first()
 
-    # Pass de 'gebruiker' variabele naar de template voor consistentie
+    # Pass de 'gebruiker' variabele naar de template voor consistentie met profile.html
+    # (Ранее здесь было 'user=session["user"]', теперь 'gebruiker=gebruiker' для соответствия шаблону)
     return render_template('profile.html', gebruiker=gebruiker)
 
 
@@ -149,17 +150,22 @@ def instellingen():
     return render_template('instellingen.html', gebruiker=gebruiker)
 
 
-# Oude update_settings route is nu samengevoegd met instellingen route
+# Oude update_settings route is NIET MEER NODIG, de logica zit nu in de POST van /instellingen
+# DEZE REGELS ZIJN VERWIJDERD OM FOUTEN TE VOORKOMEN:
 # @routes.route('/update_settings', methods=['POST'])
 # def update_settings():
-#     ...
+#    ... (deze functie is nu geintegreerd in instellingen)
 
-# NIEUWE ROUTES VOOR BESTELGESCHIEDENIS EN FAVORITEN
+# ROUTES VOOR BESTELGESCHIEDENIS EN FAVORITEN
 @routes.route('/bestelgeschiedenis')
 def bestelgeschiedenis():
     if "user" not in session:
         session["next_url"] = url_for("routes.bestelgeschiedenis")
         return redirect(url_for("routes.login"))
+    # Haal de gebruiker op uit de database
+    user_id = session["user"]["userinfo"]["sub"]
+    gebruiker = db.session.query(Usertable).filter_by(user_id=user_id).first()
+
     # Hier kun je logica toevoegen om de bestelgeschiedenis van de gebruiker op te halen
     # Bijvoorbeeld: orders = db.session.query(OrderTable).filter_by(user_id=gebruiker.id).all()
     orders = []  # Placeholder voor echte data
@@ -171,6 +177,10 @@ def favorieten():
     if "user" not in session:
         session["next_url"] = url_for("routes.favorieten")
         return redirect(url_for("routes.login"))
+    # Haal de gebruiker op uit de database
+    user_id = session["user"]["userinfo"]["sub"]
+    gebruiker = db.session.query(Usertable).filter_by(user_id=user_id).first()
+
     # Hier kun je logica toevoegen om de favoriete items van de gebruiker op te halen
     # Bijvoorbeeld: favorites = db.session.query(FavoriteTable).filter_by(user_id=gebruiker.id).all()
     favorites = []  # Placeholder voor echte data
@@ -188,6 +198,8 @@ def auto():
     # Kan filtering doen op datum en beschikbaarheid van auto's
     autos = db.session.query(LuxeAuto).filter_by(available=True).all()
 
+    # Kleinere correctie: 'eind' variabele moet eind_datum en eind_tijd correct combineren.
+    # Vooral als de vorige lijn 'eind=f"{eind_tijd} {eind_tijd}"' was, wat een typefout is.
     return render_template('auto.html', autos=autos, locatie=locatie,
                            start=f"{start_datum} {start_tijd}",
-                           eind=f"{eind_tijd} {eind_tijd}")  # Corrected eind_tijd here
+                           eind=f"{eind_datum} {eind_tijd}")
