@@ -1,10 +1,13 @@
 import os
-from flask import Blueprint, render_template, session, redirect, url_for, current_app, request
+from flask import Blueprint, render_template, session, redirect, url_for, current_app, request, jsonify
 import json
 from os import environ as env
 from urllib.parse import quote_plus, urlencode
 from functools import wraps
 from app.database.models import LuxeAuto
+from app.database import db, SessionLocal
+import requests
+
 from authlib.integrations.flask_client import OAuth
 from app.database import db
 from dotenv import find_dotenv, load_dotenv
@@ -88,11 +91,58 @@ def admin_required(f):
 def admin():
     return render_template("admin.html")
 
+#####
+#API#
+#####
+@routes.route('/sync_cars', methods=['GET'])
+@admin_required
+def sync_cars():
+    api_url = 'https://luxury-cars-api.onrender.com/cars'
+    response = requests.get(api_url)
+    if response.status_code != 200:
+        return jsonify({"error": "Failed to fetch API data"}), 500
+
+    cars = response.json()
+    session = SessionLocal()
+
+    try:
+        for car_data in cars:
+            # Look for existing car by license_plate
+            existing_car = session.query(LuxeAuto).filter_by(license_plate=car_data['license_plate']).first()
+            if existing_car:
+                # Update existing car fields
+                existing_car.brand = car_data['brand']
+                existing_car.model = car_data['model']
+                existing_car.year = car_data['year']
+                existing_car.price = car_data['price']
+                existing_car.available = car_data['available']
+                existing_car.foto_url = car_data.get('foto_url', 'img/default_car.jpg')
+            else:
+                # Create new car
+                new_car = LuxeAuto(
+                    brand=car_data['brand'],
+                    model=car_data['model'],
+                    year=car_data['year'],
+                    price=car_data['price'],
+                    license_plate=car_data['license_plate'],
+                    available=car_data['available'],
+                    foto_url=car_data.get('foto_url', 'img/default_car.jpg')
+                )
+                session.add(new_car)
+
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        session.close()
+
+    return jsonify({"message": "Cars synced successfully."})
 
 
-
-
-
+##########
+#ALGEMEEN#
+##########
 # Terugkomst van ingelogde mensen of bezoekers
 @routes.route('/')
 def index():
