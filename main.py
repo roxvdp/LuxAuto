@@ -9,11 +9,8 @@ from authlib.integrations.flask_client import OAuth
 # Laad .env file
 load_dotenv()
 
-
 # Initialiseer Flask
 app = Flask(__name__, template_folder='app/templates', static_folder='app/static')
-
-# Secret key instellen voor sessies
 app.secret_key = getenv("APP_SECRET_KEY")
 
 # databank init
@@ -34,9 +31,8 @@ oauth.register(
 )
 
 
-# Registreer je Blueprint-routes
+# Blueprints
 app.register_blueprint(routes)
-
 
 if __name__ == '__main__':
     from app.database.models import Base
@@ -44,4 +40,3 @@ if __name__ == '__main__':
 
     Base.metadata.create_all(bind=engine)
     app.run(host='0.0.0.0', port=8000, debug=True)
-
