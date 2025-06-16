@@ -45,7 +45,7 @@ def callback():
 
 
     # Try to find user in DB
-    user = db.query(Usertable).filter_by(user_id=auth0_user_id).first()
+    user = db.session.query(Usertable).filter_by(user_id=auth0_user_id).first()
 
     if not user:
         user = Usertable(
@@ -53,9 +53,9 @@ def callback():
             email=email,
             naam=naam,
         )
-        db.add(user)
-        db.commit()
-        db.refresh(user)
+        db.session.add(user)
+        db.session.commit()
+        db.session.refresh(user)
 
     session["user"] = {
         "userinfo": userinfo,
@@ -63,7 +63,6 @@ def callback():
     }
     session["is_admin"] = (email == os.getenv("ADMIN_USER"))
 
-    db.close()
 
     next_url = session.pop("next_url", None)
     return redirect(next_url or url_for("routes.index"))
