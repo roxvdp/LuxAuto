@@ -3,30 +3,23 @@ from dotenv import load_dotenv
 from os import getenv
 
 from app.routes import routes
+from app.database import db
 from authlib.integrations.flask_client import OAuth
-from app.database import init_app as init_db  # ✅ toegevoegd
 
-# ✅ Stap 1: Laad .env
+# Laad .env file
 load_dotenv()
 
-# ✅ Stap 2: Initialiseer Flask
+# Initialiseer Flask
 app = Flask(__name__, template_folder='app/templates', static_folder='app/static')
 app.secret_key = getenv("APP_SECRET_KEY")
 
-# ✅ Stap 3: Stel database URI in vóór init_db
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    f"postgresql://{getenv('POSTGRES_USER')}:{getenv('POSTGRES_PASSWORD')}"
-    f"@{getenv('POSTGRES_HOST')}:{getenv('POSTGRES_PORT')}/{getenv('POSTGRES_DB')}"
-)
+# databank init
+app.config["SQLALCHEMY_DATABASE_URI"] = getenv("DATABASE_URL")
+db.init_app(app)
 
-# (optioneel) print debug
-print("Database URI:", app.config['SQLALCHEMY_DATABASE_URI'])
-
-# ✅ Stap 4: Init DB
-init_db(app)
-
-# ✅ Stap 5: Auth0
+# 0Auth instellen
 oauth = OAuth(app)
+app.oauth=oauth
 oauth.register(
     "auth0",
     client_id=getenv("AUTH0_CLIENT_ID"),
@@ -36,10 +29,14 @@ oauth.register(
     },
     server_metadata_url=f'https://{getenv("AUTH0_DOMAIN")}/.well-known/openid-configuration'
 )
-app.oauth = oauth
 
-# ✅ Stap 6: Blueprints
+
+# Blueprints
 app.register_blueprint(routes)
 
 if __name__ == '__main__':
+    from app.database.models import Base
+    from app.database.session import engine
+
+    Base.metadata.create_all(bind=engine)
     app.run(host='0.0.0.0', port=8000, debug=True)
