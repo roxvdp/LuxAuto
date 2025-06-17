@@ -1,3 +1,5 @@
-# LuxAuto
+Groepswerk gemaakt door:
 
-Luxery car selling business
+Aslambek Chamutaev
+Mathijs Adriaensen
+Roxanne Van der Putten
