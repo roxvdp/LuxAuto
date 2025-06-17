@@ -11,7 +11,7 @@
     <div class="card-item">
         <h2>{{ auto.brand }} {{ auto.model }} ({{ auto.year }})</h2>
 
-        <img src="{{ url_for('static', filename=auto.foto_url) }}" alt="Foto van auto" class="auto-foto">
+        <img src="{{ auto.foto_url }}" alt="Foto van {{ auto.brand }} {{ auto.model }}" class="auto-foto">
 
         <ul class="auto-details">
             <li><strong>Prijs per dag:</strong> €{{ auto.price }}</li>

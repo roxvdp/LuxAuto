@@ -87,3 +87,16 @@
     text-align: center;
     margin-top: 20px;
 }
+
+.auto-foto {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: 400px;
+    object-fit: contain;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
