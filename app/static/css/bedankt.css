@@ -1,0 +1,55 @@
+.card-slider {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.card-item {
+  background-color: #ffffff;
+  border-radius: 15px;
+  padding: 30px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.card-item h2 {
+  margin-bottom: 15px;
+  font-size: 28px;
+  color: #28a745;
+}
+
+.bevestiging-lijst {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.bevestiging-lijst li {
+  margin: 8px 0;
+  font-size: 16px;
+}
+
+.knoppen-groep {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.terug-btn {
+  display: inline-block;
+  background-color: #333;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  padding: 12px 20px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.terug-btn:hover {
+  background-color:#333;
+}
