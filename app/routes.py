@@ -1,10 +1,12 @@
 import os
-from flask import Blueprint, render_template, session, redirect, url_for, current_app, request, jsonify, flash
+from flask import Blueprint, render_template, session, redirect, url_for, current_app, request, jsonify, flash, get_flashed_messages
 from os import environ as env
 from urllib.parse import quote_plus, urlencode
 from functools import wraps
-from app.database.models import LuxeAuto, Usertable,ContactBericht
+from app.database.models import LuxeAuto, Usertable,ContactBericht, Reservatie
 from app.database import db
+from datetime import datetime, timedelta
+import stripe
 
 import requests
 from dotenv import find_dotenv, load_dotenv
@@ -15,6 +17,10 @@ routes = Blueprint('routes', __name__)
 ENV_FILE = find_dotenv()
 if ENV_FILE:
     load_dotenv(ENV_FILE)
+
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+print("✅ STRIPE_SECRET_KEY uit .env:", repr(os.getenv("STRIPE_SECRET_KEY")))
+
 
 @routes.route("/login")
 def login():
@@ -252,3 +258,131 @@ def contact():
 @routes.route("/contact/bevestiging")
 def contact_bevestiging():
     return render_template("contact_bevestiging.html")
+
+@routes.route("/auto/<int:auto_id>/reserveren", methods=["POST"])
+def reserveer_auto(auto_id):
+    if "user" not in session:
+        session["next_url"] = request.path
+        return redirect(url_for("routes.login"))
+
+    db_sessie = db.session
+    auto = db_sessie.query(LuxeAuto).filter_by(id=auto_id).first()
+    gebruiker = db_sessie.query(Usertable).filter_by(id=session["user"]["db_id"]).first()
+
+    if not auto or not auto.available:
+        flash("Deze auto is momenteel niet beschikbaar.", "danger")
+        return redirect(url_for("routes.autos"))
+
+    try:
+        start_datum = datetime.strptime(request.form["start_datum"], "%Y-%m-%d")
+        eind_datum = datetime.strptime(request.form["eind_datum"], "%Y-%m-%d")
+        dagen = (eind_datum - start_datum).days
+        if dagen <= 0:
+            flash("De gekozen datums zijn ongeldig.", "danger")
+            return redirect(url_for("routes.auto_detail", auto_id=auto_id))
+
+        totaal_prijs = float(auto.price) * dagen
+
+        session["reservering_data"] = {
+            "auto_id": auto.id,
+            "start_datum": start_datum.strftime("%Y-%m-%d"),
+            "eind_datum": eind_datum.strftime("%Y-%m-%d"),
+            "totaal_prijs": totaal_prijs
+        }
+
+        # Stripe sessie starten
+        stripe_session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[{
+                "price_data": {
+                    "currency": "eur",
+                    "unit_amount": int(totaal_prijs * 100),
+                    "product_data": {
+                        "name": f"{auto.brand} {auto.model} - Huur"
+                    },
+                },
+                "quantity": 1,
+            }],
+            mode="payment",
+            success_url=request.host_url + "reservering-succes",
+            cancel_url=request.host_url + "reservering-annulatie",
+        )
+
+        return redirect(stripe_session.url, code=303)
+
+    except Exception as e:
+        db_sessie.rollback()
+        flash("Er ging iets fout bij het starten van de betaling.", "danger")
+        print(f"Stripe fout: {e}")
+        return redirect(url_for("routes.auto_detail", auto_id=auto_id))
+
+# ✅ Na betaling succesvol: reservering opslaan
+@routes.route("/reservering-succes")
+def reservering_succes():
+    if "user" not in session or "reservering_data" not in session:
+        flash("Sessie verlopen. Log opnieuw in.", "danger")
+        return redirect(url_for("routes.login"))
+
+    data = session.pop("reservering_data", None)
+    db_sessie = db.session
+
+    auto = db_sessie.query(LuxeAuto).filter_by(id=data["auto_id"]).first()
+    gebruiker = db_sessie.query(Usertable).filter_by(id=session["user"]["db_id"]).first()
+
+    if not auto or not gebruiker:
+        flash("Reservatiegegevens niet gevonden.", "danger")
+        return redirect(url_for("routes.autos"))
+
+    start_datum = datetime.strptime(data["start_datum"], "%Y-%m-%d")
+    eind_datum = datetime.strptime(data["eind_datum"], "%Y-%m-%d")
+
+    nieuwe_reservatie = Reservatie(
+        gebruiker_id=gebruiker.id,
+        auto_id=auto.id,
+        start_datum=start_datum,
+        eind_datum=eind_datum,
+        totaal_prijs=data["totaal_prijs"],
+        status="gepland"
+    )
+
+    auto.available = False
+    db_sessie.add(nieuwe_reservatie)
+    db_sessie.commit()
+
+    return render_template(
+        "bedankt.html",
+        data={
+            "auto_id": auto.id,
+            "start_datum": start_datum.strftime("%d-%m-%Y"),
+            "totaal_prijs": data["totaal_prijs"]
+        },
+        einddatum=eind_datum.strftime("%d-%m-%Y"),
+        auto=auto
+    )
+# ❌ Bij annulatie van betaling
+@routes.route("/reservering-annulatie")
+def reservering_annulatie():
+    flash("Je betaling werd geannuleerd.", "warning")
+    return redirect(url_for("routes.autos"))
+
+@routes.route("/test-stripe")
+def test_stripe():
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[{
+                "price_data": {
+                    "currency": "eur",
+                    "unit_amount": 1999,
+                    "product_data": {"name": "Test Stripe Product"}
+                },
+                "quantity": 1
+            }],
+            mode="payment",
+            success_url=request.host_url + "reservering-succes",
+            cancel_url=request.host_url + "reservering-annulatie"
+        )
+        return redirect(session.url, code=303)
+    except Exception as e:
+        print("❌ Stripe testfout:", e)
+        return f"Stripe testfout: {e}"
