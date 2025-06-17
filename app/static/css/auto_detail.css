@@ -1,0 +1,89 @@
+.card-slider {
+    display: flex;
+    justify-content: center;
+    padding: 30px 15px;
+}
+
+.card-item {
+    background-color: #FFFFFF;
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card-item h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.auto-foto {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.auto-details {
+    list-style-type: none;
+    padding-left: 0;
+    margin-bottom: 30px;
+}
+
+.auto-details li {
+    margin: 8px 0;
+    font-size: 16px;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+.btn-reserveer {
+    background-color: #333;
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-reserveer:hover {
+    background-color: #333;
+}
+
+.login-waarschuwing {
+    color: #dc3545;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 20px;
+}
