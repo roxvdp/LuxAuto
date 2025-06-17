@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Bedankt{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bedankt.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="card-slider">
+  <div class="card-item">
+    <h2>🎉 Bedankt!</h2>
+    <p>Je reservatie werd bevestigd.</p>
+
+    {% if data.get('auto_id') %}
+    <ul class="bevestiging-lijst">
+      <li><strong>Auto:</strong> {{ auto.brand }} {{ auto.model }} ({{ auto.year }})</li>
+      <li><strong>Periode:</strong> {{ data.start_datum }} → {{ einddatum }}</li>
+      <li><strong>Totale prijs:</strong> €{{ data.totaal_prijs }}</li>
+      <li><strong>Status:</strong> Gepland ✅</li>
+    </ul>
+    {% endif %}
+
+    <div class="knoppen-groep">
+      <a href="/" class="terug-btn">⬅ Startpagina</a>
+      <a href="{{ url_for('routes.profiel') }}" class="terug-btn">👤 Profiel</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

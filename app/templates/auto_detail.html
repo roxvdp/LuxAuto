@@ -1,11 +1,44 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
+{% block title %}Auto reserveren{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auto_detail.css') }}">
+{% endblock %}
 
 {% block content %}
-  <div class="auto-detail">
-    <h2>{{ auto.brand }} {{ auto.model }} ({{ auto.year }})</h2>
-    <img src="{{ auto.foto_url }}" alt="Foto van {{ auto.brand }}">
-    <p>Prijs per dag: €{{ auto.price }}</p>
-    <p>Nummerplaat: {{ auto.license_plate }}</p>
-    <a href="#" class="btn btn-primary">Reserveer nu</a>
-  </div>
+<div class="card-slider">
+    <div class="card-item">
+        <h2>{{ auto.brand }} {{ auto.model }} ({{ auto.year }})</h2>
+
+        <img src="{{ url_for('static', filename=auto.foto_url) }}" alt="Foto van auto" class="auto-foto">
+
+        <ul class="auto-details">
+            <li><strong>Prijs per dag:</strong> €{{ auto.price }}</li>
+            <li><strong>Nummerplaat:</strong> {{ auto.license_plate }}</li>
+            <li><strong>Status:</strong> {% if auto.available %}✅ Beschikbaar{% else %}❌ Niet beschikbaar{% endif %}</li>
+        </ul>
+
+        {% if session.get('user') %}
+        <form method="POST" action="{{ url_for('routes.reserveer_auto', auto_id=auto.id) }}" class="form-container">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="start_datum">Startdatum:</label>
+                    <input type="date" id="start_datum" name="start_datum" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="eind_datum">Einddatum:</label>
+                    <input type="date" id="eind_datum" name="eind_datum" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn-reserveer">Reserveer & betaal</button>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

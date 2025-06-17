@@ -20,7 +20,15 @@
                 <p>Bouwjaar: {{ auto.year }}</p>
                 <p>Prijs per dag: €{{ '{:.2f}'.format(auto.price) }}</p>
                 <p>Nummerplaat: {{ auto.license_plate }}</p>
-                <a href="{{ url_for('routes.auto_detail', auto_id=auto.id) }}" class="btn-huur">Huur of reserveer mij</a>
+
+                <a href="{% if session.get('user') %}
+                             {{ url_for('routes.auto_detail', auto_id=auto.id) }}
+                         {% else %}
+                             {{ url_for('routes.login', next=url_for('routes.auto_detail', auto_id=auto.id)) }}
+                         {% endif %}"
+                   class="btn-huur">
+                   Huur of reserveer mij
+                </a>
             </div>
         </div>
         {% endfor %}
