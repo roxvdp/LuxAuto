@@ -31,7 +31,7 @@ class LuxeAuto(Base):
     price = Column(DECIMAL, nullable=False)                # Dagprijs in €
     license_plate = Column(String, unique=True, nullable=False)       # Unieke nummerplaat
     available = Column(Boolean, default=True)                     # Verhuurstatus
-    foto_url = Column(String, default="img/default_car.jpg")        # Foto van de wagen
+    foto_url = Column(String)        # Foto van de wagen
 
     reservaties = relationship("Reservatie", back_populates="auto") # Koppeling naar reservaties
 

@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, render_template, session, redirect, url_for, current_app, request, jsonify, flash, get_flashed_messages
+from flask import Blueprint, render_template, session, redirect, url_for, current_app, request, jsonify, flash
 from os import environ as env
 from urllib.parse import quote_plus, urlencode
 from functools import wraps
@@ -7,6 +7,8 @@ from app.database.models import LuxeAuto, Usertable,ContactBericht, Reservatie
 from app.database import db
 from datetime import datetime, timedelta
 import stripe
+from app.database.models import LuxeAuto, Usertable,ContactBericht
+from app.database import db, SessionLocal
 
 import requests
 from dotenv import find_dotenv, load_dotenv
@@ -119,6 +121,11 @@ def sync_cars():
         return jsonify({"error": "Failed to fetch API data"}), 500
 
     cars = response.json()
+
+    # Debug print to check foto_url before syncing
+    for car_data in cars:
+        print(f"Syncing car {car_data['license_plate']}: foto_url = {car_data.get('foto_url')}")
+
     session = db.session  # ✅ Gebruik Flask-SQLAlchemy sessie
 
     try:
@@ -130,7 +137,7 @@ def sync_cars():
                 existing_car.year = car_data['year']
                 existing_car.price = car_data['price']
                 existing_car.available = car_data['available']
-                existing_car.foto_url = car_data.get('foto_url', 'img/default_car.jpg')
+                existing_car.foto_url = car_data.get('foto_url')
             else:
                 new_car = LuxeAuto(
                     brand=car_data['brand'],
@@ -139,7 +146,7 @@ def sync_cars():
                     price=car_data['price'],
                     license_plate=car_data['license_plate'],
                     available=car_data['available'],
-                    foto_url=car_data.get('foto_url', 'img/default_car.jpg')
+                    foto_url=car_data.get('foto_url')
                 )
                 session.add(new_car)
 
@@ -162,9 +169,18 @@ def index():
 @routes.route('/profiel')
 def profiel():
     if "user" not in session:
-        session["next_url"] = url_for("routes.profiel")
+        flash("Je bent niet ingelogd", "warning")
         return redirect(url_for("routes.login"))
-    return render_template('profile.html', user=session["user"])
+
+    db_id = session["user"].get("db_id")
+    if not db_id:
+        flash("Ongeldige sessiegegevens.", "danger")
+        return redirect(url_for("routes.login"))
+
+    db_session = SessionLocal()
+    gebruiker = db_session.query(Usertable).filter_by(id=db_id).first()
+
+    return render_template("profile.html", gebruiker=gebruiker)
 
 @routes.route("/auto")
 def autos():
