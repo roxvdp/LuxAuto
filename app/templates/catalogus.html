@@ -1,0 +1,42 @@
+{% extends 'base_admin.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/catalogus.css') }}">
+{% endblock %}
+
+{% block content %}
+<h1>Catalogusbeheer</h1>
+
+<a href="{{ url_for('routes.auto_toevoegen') }}" class="btn btn-primary">➕ Nieuwe auto toevoegen</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Merk</th>
+            <th>Model</th>
+            <th>Jaar</th>
+            <th>Prijs</th>
+            <th>Status</th>
+            <th>Acties</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for auto in autos %}
+        <tr>
+            <td>{{ auto.brand }}</td>
+            <td>{{ auto.model }}</td>
+            <td>{{ auto.year }}</td>
+            <td>€{{ '%.2f' | format(auto.price) }}</td>
+            <td>{{ 'Beschikbaar' if auto.available else 'Niet beschikbaar' }}</td>
+            <td>
+                <a href="{{ url_for('routes.auto_bewerk', auto_id=auto.id) }}" class="btn btn-sm btn-warning">✏️ Bewerk</a>
+                <form method="post" action="{{ url_for('routes.auto_verwijder', auto_id=auto.id) }}" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Weet je zeker dat je deze auto wilt verwijderen?')">🗑️ Verwijder</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

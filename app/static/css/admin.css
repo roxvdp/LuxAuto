@@ -1,0 +1,67 @@
+/* css/admin.css */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #343a40;
+    margin: 0;
+    padding: 2rem;
+}
+
+h1 {
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: #212529;
+}
+
+p {
+    font-size: 1.125rem;
+    margin-bottom: 2rem;
+    color: #495057;
+}
+
+/* Container for the buttons to center them and control spacing */
+.content {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+/* Stijl voor de admin-knoppen */
+.admin-knop {
+    display: inline-block;
+    background-color: #333; /* Bootstrap primary blue */
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 12px 28px;
+    margin: 0 10px 20px 10px;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    font-size: 1.125rem;
+    user-select: none;
+}
+
+.admin-knop:hover,
+.admin-knop:focus {
+    background-color: #444; /* Donkerder blauw bij hover */
+    box-shadow: 0 6px 12px rgba(0, 86, 179, 0.4);
+    outline: none;
+}
+
+.admin-knop:active {
+    background-color: #333;
+    box-shadow: inset 0 3px 5px rgba(0, 64, 128, 0.6);
+}
+
+/* Responsive: Knoppen onder elkaar op kleinere schermen */
+@media (max-width: 480px) {
+    .admin-knop {
+        display: block;
+        margin: 10px auto;
+        width: 80%;
+        max-width: 280px;
+    }
+}

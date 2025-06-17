@@ -1,0 +1,22 @@
+{% extends 'base_admin.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+<style>
+</style>
+{% endblock %}
+
+{% block content %}
+<h2>Auto bewerken</h2>
+<form method="post">
+    Merk: <input type="text" name="brand" value="{{ auto.brand }}"><br>
+    Model: <input type="text" name="model" value="{{ auto.model }}"><br>
+    Jaar: <input type="number" name="year" value="{{ auto.year }}"><br>
+    Prijs (€): <input type="number" name="price" step="0.01" value="{{ auto.price }}"><br>
+    Nummerplaat: <input type="text" name="license_plate" value="{{ auto.license_plate }}"><br>
+    Foto URL: <input type="text" name="foto_url" value="{{ auto.foto_url }}"><br>
+    Beschikbaar: <input type="checkbox" name="available" {% if auto.available %}checked{% endif %}><br>
+    <button type="submit">Opslaan</button>
+</form>
+
+{% endblock %}

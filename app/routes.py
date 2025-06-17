@@ -101,6 +101,95 @@ def admin_required(f):
 def admin():
     return render_template("admin.html")
 
+
+@routes.route("/admin/catalogus")
+@admin_required
+def catalogus_beheer():
+    autos = db.session.query(LuxeAuto).all()
+    return render_template("catalogus.html", autos=autos)
+
+
+@routes.route('/admin/auto/toevoegen', methods=['GET', 'POST'])
+@admin_required
+def auto_toevoegen():
+    if request.method == 'POST':
+        brand = request.form.get('brand')
+        model = request.form.get('model')
+        year = request.form.get('year')
+        price = request.form.get('price')
+        license_plate = request.form.get('license_plate')
+        available = bool(request.form.get('available'))
+        foto_url = request.form.get('foto_url')
+
+        nieuwe_auto = LuxeAuto(
+            brand=brand,
+            model=model,
+            year=int(year),
+            price=price,
+            license_plate=license_plate,
+            available=available,
+            foto_url=foto_url
+        )
+
+        try:
+            db.session.add(nieuwe_auto)
+            db.session.commit()
+            flash('Auto succesvol toegevoegd.', 'success')
+            return redirect(url_for('routes.catalogus_beheer'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Fout bij toevoegen: {e}', 'danger')
+
+    return render_template("auto_toevoegen.html")
+
+@routes.route('/admin/auto/bewerk/<int:auto_id>', methods=['GET', 'POST'])
+@admin_required
+def auto_bewerk(auto_id):
+    auto = db.session.get(LuxeAuto, auto_id)
+    if not auto:
+        flash('Auto niet gevonden.', 'danger')
+        return redirect(url_for('routes.catalogus_beheer'))
+
+    if request.method == 'POST':
+        auto.brand = request.form.get('brand')
+        auto.model = request.form.get('model')
+        auto.year = int(request.form.get('year'))
+        auto.price = request.form.get('price')
+        auto.license_plate = request.form.get('license_plate')
+        auto.available = bool(request.form.get('available'))
+        auto.foto_url = request.form.get('foto_url')
+
+        try:
+            db.session.commit()
+            flash('Auto succesvol bijgewerkt.', 'success')
+            return redirect(url_for('routes.catalogus_beheer'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Fout bij bewerken: {e}', 'danger')
+
+    return render_template("auto_bewerken.html", auto=auto)
+
+
+@routes.route('/admin/auto/verwijder/<int:auto_id>', methods=['POST'])
+@admin_required
+def auto_verwijder(auto_id):
+    auto = db.session.get(LuxeAuto, auto_id)
+    if not auto:
+        flash('Auto niet gevonden.', 'danger')
+        return redirect(url_for('routes.catalogus_beheer'))
+
+    try:
+        db.session.delete(auto)
+        db.session.commit()
+        flash('Auto succesvol verwijderd.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Fout bij verwijderen: {e}', 'danger')
+
+    return redirect(url_for('routes.catalogus_beheer'))
+
+
+
 #####
 # API
 #####
@@ -216,9 +305,6 @@ def favorieten():
         return redirect(url_for("routes.login"))
     return render_template('favorieten.html', user=session["user"])
 
-@routes.route('/auto')
-def auto():
-    return render_template('auto.html')
 
 @routes.route("/contact", methods=["GET", "POST"])
 def contact():

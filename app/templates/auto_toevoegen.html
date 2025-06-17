@@ -1,0 +1,22 @@
+{% extends 'base_admin.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+<style>
+</style>
+{% endblock %}
+
+{% block content %}
+<h2>Nieuwe auto toevoegen</h2>
+<form method="post">
+    Merk: <input type="text" name="brand" required><br>
+    Model: <input type="text" name="model" required><br>
+    Jaar: <input type="number" name="year" required><br>
+    Prijs (€): <input type="number" name="price" step="0.01" required><br>
+    Nummerplaat: <input type="text" name="license_plate" required><br>
+    Foto URL: <input type="text" name="foto_url"><br>
+    Beschikbaar: <input type="checkbox" name="available" checked><br>
+    <button type="submit">Toevoegen</button>
+</form>
+
+{% endblock %}
